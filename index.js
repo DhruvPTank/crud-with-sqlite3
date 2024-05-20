@@ -77,25 +77,43 @@ app.post('/add', (req, res) => {
     console.log(insertTask);
     insertTask.run();
     insertTask.finalize();
+
+    res.send(newTask);
     //INSERTING THE DATA INTO DATABASE ENDS HERE
 
 })
 
 //update the tsk by it with the specific id
 //also changing the file data.json with the updated data
-app.put('/update/:id', (req, res) => {
-    const mytask = arr.find(task => task.id == req.params.id);
+app.put('/update/:id', async (req, res) => {
+    //establing the connection with the database
+
+    let db = await getDBConnection();
+    let mytask = await db.all("SELECT id from tasks where id = ?", [req.params.id]);
+    await db.close();
+
     if (!mytask) {
         res.send(404).send('task not found');
     }
-
     const { task, desc } = req.body;
 
     mytask.task = task || mytask.task;
+
     //check for task value is added or not asn same for desc 
     mytask.desc = desc || mytask.desc;
-    res.send(mytask)
-    fsPromise.writeFile('data.json', JSON.stringify(arr));
+    const updateTask = database.prepare(`UPDATE tasks SET task = ?, desc = ? WHERE id = ?`, [task, desc, req.params.id]);
+
+    // console.log(updateTask);
+    updateTask.run();
+    updateTask.finalize();
+
+    const mtask = database.prepare("SELECT * FROM tasks WHERE id = ?", [req.params.id]);
+    mtask.run();
+    mtask.finalize();
+    res.send(mtask);
+    console.log(mtask);
+
+    // fsPromise.writeFile('data.json', JSON.stringify(arr));
 })
 app.delete('/delete/:id', (req, res) => {
     //DELETE THE DATA FROM DATABASE STARTS HERE
