@@ -1,4 +1,4 @@
 file_store.js
 node_modules
 note.txt
-*.db
+notes.db
