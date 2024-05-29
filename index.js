@@ -8,8 +8,6 @@ const sqlite3 = require('sqlite3').verbose();
 const sql3 = require('sqlite3');
 const sql = require('sqlite');
 
-app.use(bodyParser.json());
-
 
 //Database declaration starts here  
 let database = new sqlite3.Database('notes.db');
@@ -35,9 +33,7 @@ async function getDBConnection() {
 //Database declaration ends here
 
 
-app.get('/', (req, res) => {
-    res.send('todo list app');
-});
+
 
 
 //get the task list by it from the api with post man
@@ -64,7 +60,7 @@ app.get('/tasks', async (req, res) => {
 app.post('/add', (req, res) => {
     const { task, desc } = req.body;
     if (!task || !desc) {
-        return res.send('Missing task or desc');
+        return res.send('Missing task or desc'); c
     }
     //     const newTask = { id: arr.length + 1, task, desc }
     const newTask = { task, desc }
@@ -135,6 +131,7 @@ app.delete('/delete/:id', (req, res) => {
 
     //DELETE THE DATA FROM DATABASE ENDS HERE
 })
+
 
 
 
