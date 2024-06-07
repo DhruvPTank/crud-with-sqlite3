@@ -1,18 +1,13 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const app = express();
-const port = 5000;
-//db users code 
 const { Sequelize, DataTypes } = require('sequelize');
-const { default: getusers } = require('./users');
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'notes.db',
 })
 
 app.use(bodyParser.json());
-
-getusersers();
 
 const Tasks = sequelize.define(
     'Tasks',
@@ -40,14 +35,11 @@ const Tasks = sequelize.define(
     },
 );
 
+
 //checks the table is created or not
 Tasks.sync({ alter: true });
 
-app.get('/users', async (req, res) => {
-    const users = await Tasks.findAll();
-    res.json(users);
-    console.log("tasks founded");
-});
+
 
 app.post('/addusers', async (req, res) => {
     const { username, password } = req.body;
@@ -74,9 +66,15 @@ app.post('/addusers', async (req, res) => {
     res.send(user)
 
 
-})
-
-
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
 });
+
+function getusers() {
+    app.get('/users', async (req, res) => {
+        const users = await Tasks.findAll();
+        res.json(users);
+        console.log("tasks founded");
+    });
+}
+
+
+module.exports = getusers;

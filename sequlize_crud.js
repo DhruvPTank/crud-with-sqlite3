@@ -50,19 +50,12 @@ const Tasks = sequelize.define(
 //checks the table is created or not
 Tasks.sync({ alter: true });
 
-
-
-
 //get all method
 app.get('/tasks', async (req, res) => {
     const tasks = await Tasks.findAll();
     res.json(tasks);
     console.log("tasks founded");
 });
-``
-
-
-
 
 //Add the Task to the table
 app.post('/add', async (req, res) => {
