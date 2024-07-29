@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const express = require('express');
+const router = express.Router();
 const app = express();
 const bodyParser = require('body-parser');
 const sequelize = new Sequelize({
@@ -9,10 +10,10 @@ const sequelize = new Sequelize({
 
 app.use(bodyParser.json());
 
-const Tasks = sequelize.define(
-    'Tasks',
+const Users = sequelize.define(
+    'Users',
     {
-        id: {
+        Uid: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
@@ -37,14 +38,18 @@ const Tasks = sequelize.define(
 
 
 //checks the table is created or not
-Tasks.sync({ alter: true });
+Users.sync({ alter: true });
 
+router.get('/users', async (req, res) => {
+    const users = await Users.findAll();
+    res.json(users);
+    console.log("Users founded");
+});
 
-
-app.post('/addusers', async (req, res) => {
+router.post('/addusers', async (req, res) => {
     const { username, password } = req.body;
 
-    const uname = await Tasks.findOne({ where: { username } });
+    const uname = await Users.findOne({ where: { username } });
     // console.log(uname);
     if (!username || !password) {
         return res.status(400).json({ error: 'username and password required' })
@@ -55,7 +60,7 @@ app.post('/addusers', async (req, res) => {
     }
     //  console.log(typeof uname.username);
     //  console.log(typeof username);
-    const user = await Tasks.create(
+    const user = await Users.create(
         {
             username,
             password,
@@ -67,13 +72,7 @@ app.post('/addusers', async (req, res) => {
 
 });
 
-function getusers() {
-    app.get('/users', async (req, res) => {
-        const users = await Tasks.findAll();
-        res.json(users);
-        console.log("tasks founded");
-    });
-}
+   
 
 
-module.exports = getusers;
+module.exports = router;

@@ -4,7 +4,6 @@ const sqlite3 = require('sqlite3').verbose();
 const sql3 = require('sqlite3');
 const sql = require('sqlite');
 const bodyParser = require('body-parser');
-const getusers = require('./users');
 
 
 app.use(bodyParser.json());
@@ -21,7 +20,6 @@ database.serialize(() => {
 
     // mytasks.finalize();
 });
-getusers();
 
 async function getDBConnection() {
     const db = await sql.open({
