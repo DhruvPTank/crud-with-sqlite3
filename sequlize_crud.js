@@ -84,7 +84,7 @@ router.put('/update/:id', async (req, res) => {
     const task = await Tasks.findOne({
         where: { id: parseInt(req.params.id) },
     });
-
+        // console.log(typeof task)
     // console.log(typeof parseInt(req.params.id));
     // console.log(typeof task.id);
 

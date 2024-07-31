@@ -40,12 +40,15 @@ const Users = sequelize.define(
 //checks the table is created or not
 Users.sync({ alter: true });
 
+
+//get all Users
 router.get('/users', async (req, res) => {
     const users = await Users.findAll();
     res.json(users);
     console.log("Users founded");
 });
 
+//Insert Users
 router.post('/addusers', async (req, res) => {
     const { username, password } = req.body;
 
@@ -69,10 +72,26 @@ router.post('/addusers', async (req, res) => {
     );
     res.send(user)
 
-
 });
 
-   
+router.delete('/deluser/:id', async (req, res) => {
+    const id = req.params.id;
+    const Uid = await Users.findOne({ where: { Uid: parseInt(req.params.id) } });
+    // console.log(typeof parseInt(Uid));
+    // console.log(typeof parseInt(req.params.id));
+
+    if (!Uid) {
+        return res.status(400).json({ error: 'user not found' })
+    }
+    else {
+        const user = await Users.destroy({ where: { Uid: id } });
+        res.json(Uid);
+        console.log(Uid);
+        console.log("User deleted");
+    };
+});
+
+
 
 
 module.exports = router;
