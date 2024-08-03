@@ -2,14 +2,14 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const port = 5000;
-const sequelizeRoute = require('./sequlize_crud');
-const userRoute = require('./users')
+const tasksRouter = require('./sequlize_crud');
+const usersRouter = require('./users')
 // const userRoute = require('./users');
 
 app.use(express.json());
 app.use(bodyParser.json());
-app.use("/sequel", sequelizeRoute);
-app.use("/User", userRoute)
+app.use("/sequel", tasksRouter);
+app.use("/User", usersRouter)
 
 // http://localhost:5000/sequal/tasks
 

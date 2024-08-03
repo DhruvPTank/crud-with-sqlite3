@@ -1,120 +1,88 @@
+
+
 const express = require('express');
+const { Tasks, Users } = require('./data_tables');
 const router = express.Router();
-const { Sequelize, DataTypes } = require('sequelize');
-const { type } = require('os');
-
-
-
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: 'notes.db',
-})
 
 router.get('/', (req, res) => {
-    res.send('todo list app');
+    res.send('Todo list app');
 });
 
-//Defines the table with attribute
-const Tasks = sequelize.define(
-    'Tasks',
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-        },
+// Get all tasks for a specific user
+router.get('/tasks/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const user = await Users.findOne({ where: { Uid: userId } });
 
-        task: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
 
-        desc: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-    },
-    {
-        freezeTableName: true,
-        tableName: 'myTasks',
-        timestamps: false,
-    },
-);
-
-
-//checks the table is created or not
-Tasks.sync({ alter: true });
-
-//get all method
-router.get('/tasks', async (req, res) => {
-    const tasks = await Tasks.findAll();
+    const tasks = await Tasks.findAll({ where: { UserId: userId } });
     res.json(tasks);
-    console.log("tasks founded");
+    console.log("Tasks found for user");
 });
 
-//Add the Task to the table
-router.post('/add', async (req, res) => {
+// Add a task for a specific user
+router.post('/add/:userId', async (req, res) => {
+    const { userId } = req.params;
     const { task, desc } = req.body;
+
     if (!task || !desc) {
-        return res.send('Missing task or desc');
+        return res.status(400).json({ error: 'Task and description required' });
     }
 
-    const mytask = await Tasks.create(
-        {
-            task,
-            desc,
-        },
+    const user = await Users.findOne({ where: { Uid: userId } });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
 
-    );
-
-    res.json(mytask);
-    console.log("task created");
+    const myTsk = await Tasks.create({ task, desc, UserId: userId });
+    res.json(myTsk);
+    console.log("Task created for user");
 });
 
+// Update a task for a specific user
+router.put('/update/:userId/:taskId', async (req, res) => {
+    const { userId, taskId } = req.params;
+    const { task, desc } = req.body;
 
-//update the task by id
-
-
-router.put('/update/:id', async (req, res) => {
-
-    if (!req.body.task || !req.body.desc) {
-        return res.send('Missing task or desc for update');
+    if (!task || !desc) {
+        return res.status(400).json({ error: 'Task and description required for update' });
     }
 
-    const task = await Tasks.findOne({
-        where: { id: parseInt(req.params.id) },
-    });
-        // console.log(typeof task)
-    // console.log(typeof parseInt(req.params.id));
-    // console.log(typeof task.id);
-
-    if (!task) {
-        return res.status(404).send('Task not found');
+    const user = await Users.findOne({ where: { Uid: userId } });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
     }
 
-    // console.log(typeof req.body.task);
-    try {
-        await Tasks.update(
-            {
-                task: req.body.task,
-                desc: req.body.desc,
-            },
-            { where: { id: req.params.id } }
-        );
-        res.send(req.body);
-    } catch (error) {
-        res.status(500);
+    const exTask = await Tasks.findOne({ where: { id: taskId, UserId: userId } });
+    if (!exTask) {
+        return res.status(404).json({ error: 'Task not found' });
     }
+
+    await Tasks.update({ task, desc }, { where: { id: taskId, UserId: userId } });
+    res.send(req.body);
+    console.log("Task updated for user");
 });
 
+// Delete a task for a specific user
+router.delete('/delete/:userId/:taskId', async (req, res) => {
+    const { userId, taskId } = req.params;
 
-router.delete('/delete/:id', async (req, res) => {
-    await Tasks.destroy({
-        where: {
-            id: req.params.id,
-        },
-    });
+    const user = await Users.findOne({ where: { Uid: userId } });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    const exTask = await Tasks.findOne({ where: { id: taskId, UserId: userId } });
+    if (!exTask) {
+        return res.status(404).json({ error: 'Task not found' });
+    }
+
+    await Tasks.destroy({ where: { id: taskId, UserId: userId } });
     res.send('Task deleted');
-},);
+    console.log("Task deleted for user");
+});
 
 module.exports = router;
+
